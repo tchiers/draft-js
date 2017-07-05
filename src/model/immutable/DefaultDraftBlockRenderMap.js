@@ -64,6 +64,9 @@ const DefaultDraftBlockRenderMap: DraftBlockRenderMap = Map({
     element: 'div',
     aliasedElements: ['p'],
   },
+  'table' : {
+    element: 'table',
+  }
 });
 
 module.exports = DefaultDraftBlockRenderMap;

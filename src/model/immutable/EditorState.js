@@ -17,6 +17,7 @@ var ContentState = require('ContentState');
 var EditorBidiService = require('EditorBidiService');
 var Immutable = require('immutable');
 var SelectionState = require('SelectionState');
+var TableDraftDecorator = require('TableDraftDecorator');
 
 import type {BlockMap} from 'BlockMap';
 import type {DraftDecoratorType} from 'DraftDecoratorType';
@@ -35,6 +36,7 @@ type EditorStateRecordType = {
   allowUndo: boolean,
   currentContent: ?ContentState,
   decorator: ?DraftDecoratorType,
+  externalDecorator: ?DraftDecoratorType,
   directionMap: ?OrderedMap<string, string>,
   forceSelection: boolean,
   inCompositionMode: boolean,
@@ -51,6 +53,7 @@ var defaultRecord: EditorStateRecordType = {
   allowUndo: true,
   currentContent: null,
   decorator: null,
+  externalDecorator: null,
   directionMap: null,
   forceSelection: false,
   inCompositionMode: false,
@@ -93,8 +96,12 @@ class EditorState {
 
   static create(config: Object): EditorState {
     var {currentContent, decorator} = config;
+    const externalDecorator = decorator;
+    decorator = new TableDraftDecorator(decorator);
     var recordConfig = {
       ...config,
+      decorator,
+      externalDecorator,
       treeMap: generateNewTreeMap(currentContent, decorator),
       directionMap: EditorBidiService.getDirectionMap(currentContent),
     };
@@ -106,32 +113,36 @@ class EditorState {
   static set(editorState: EditorState, put: Object): EditorState {
     var map = editorState.getImmutable().withMutations(state => {
       var existingDecorator = state.get('decorator');
-      var decorator = existingDecorator;
+      var existingExternalDecorator = state.get('externalDecorator');
+      var externalDecorator = existingExternalDecorator;
       if (put.decorator === null) {
-        decorator = null;
+        externalDecorator = null;
       } else if (put.decorator) {
-        decorator = put.decorator;
+        externalDecorator = put.decorator;
       }
 
       var newContent = put.currentContent || editorState.getCurrentContent();
+      var newDecorator = existingDecorator;
 
-      if (decorator !== existingDecorator) {
+      if (externalDecorator !== existingExternalDecorator) {
         var treeMap: OrderedMap<any, any> = state.get('treeMap');
         var newTreeMap;
-        if (decorator && existingDecorator) {
+        newDecorator = new TableDraftDecorator(externalDecorator);
+        if (externalDecorator && existingDecorator) {
           newTreeMap = regenerateTreeForNewDecorator(
             newContent,
             newContent.getBlockMap(),
             treeMap,
-            decorator,
+            newDecorator,
             existingDecorator,
           );
         } else {
-          newTreeMap = generateNewTreeMap(newContent, decorator);
+          newTreeMap = generateNewTreeMap(newContent, newDecorator);
         }
 
         state.merge({
-          decorator,
+          decorator: newDecorator,
+          externalDecorator: externalDecorator,
           treeMap: newTreeMap,
           nativelyRenderedContent: null,
         });
@@ -146,7 +157,7 @@ class EditorState {
             editorState,
             newContent.getBlockMap(),
             newContent.getEntityMap(),
-            decorator,
+            newDecorator,
           ),
         );
       }

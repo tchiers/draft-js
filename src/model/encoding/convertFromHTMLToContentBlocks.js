@@ -283,6 +283,7 @@ function joinChunks(A: Chunk, B: Chunk): Chunk {
     A.blocks.pop();
   }
 
+
   // Kill whitespace after blocks
   if (
     lastInA === '\r'
@@ -480,6 +481,42 @@ function genFragment(
         'MUTABLE',
         entityConfig || {},
       );
+    } else if (child instanceof HTMLTableRowElement) {
+      const tableEntity = DraftEntity.__create(
+          'TABLE-ROW',
+          'IMMUTABLE',
+          {},
+      );
+
+      const text = "\n<row>";
+      const  entityChunk = {
+        text,
+        inlines: Array(text.length).fill(OrderedSet()),
+        entities: Array(text.length).fill(tableEntity),
+        blocks: [],
+      };
+
+      chunk = joinChunks(chunk, entityChunk);
+
+
+    } else if (child instanceof HTMLTableCellElement) {
+        const tableEntity = DraftEntity.__create(
+            'TABLE-CELL',
+            'IMMUTABLE',
+            {},
+        );
+
+        const text = "<cell>";
+        const  entityChunk = {
+                text,
+                inlines: Array(text.length).fill(OrderedSet()),
+                entities: Array(text.length).fill(tableEntity),
+                blocks: [],
+            };
+
+        chunk = joinChunks(chunk, entityChunk);
+
+
     } else {
       entityId = undefined;
     }
