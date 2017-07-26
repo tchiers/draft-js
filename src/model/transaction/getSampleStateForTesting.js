@@ -40,7 +40,7 @@ var BLOCKS = [
     text: 'Bravo',
     characterList: Immutable.List(
       Immutable.Repeat(
-        CharacterMetadata.create({style: BOLD, entity: ENTITY_KEY}),
+        CharacterMetadata.create({style: BOLD, entity: null}),
         5,
       ),
     ),

@@ -38,8 +38,9 @@ class TableDraftDecorator {
             Array(block.getText().length).fill(null);
 
         for (let ii = 0; ii < decorations.length; ii++) {
-            if (testEntityType(block, contentState, ii)) {
-                decorations[ii] = (decorations[ii] ? decorations[ii] : "") + "|TableMarkup"
+            let type = testEntityType(block, contentState, ii);
+            if (type) {
+                decorations[ii] = (decorations[ii] ? decorations[ii] : "") + "|" + type;
             }
         }
 
@@ -64,7 +65,7 @@ function testEntityType(block, contentState, ii) {
     const entityKey = block.getEntityAt(ii);
     if (entityKey === null) return false;
     const type = contentState.getEntity(entityKey).getType();
-    return (type == 'TABLE-ROW' || type =='TABLE-CELL');
+    if (type == 'TABLE-ROW' || type =='TABLE-CELL') return entityKey;
 }
 
 module.exports = TableDraftDecorator;

@@ -23,6 +23,8 @@ const UL_WRAP = <ul className={cx('public/DraftStyleDefault/ul')} />;
 const OL_WRAP = <ol className={cx('public/DraftStyleDefault/ol')} />;
 const PRE_WRAP = <pre className={cx('public/DraftStyleDefault/pre')} />;
 
+const DraftEditorTable = require('DraftEditorTable.react');
+
 const DefaultDraftBlockRenderMap: DraftBlockRenderMap = Map({
   'header-one': {
     element: 'h1',
@@ -66,6 +68,7 @@ const DefaultDraftBlockRenderMap: DraftBlockRenderMap = Map({
   },
   'table' : {
     element: 'table',
+    component: DraftEditorTable,
   }
 });
 

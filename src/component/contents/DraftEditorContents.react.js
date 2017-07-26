@@ -169,7 +169,7 @@ class DraftEditorContents extends React.Component {
         );
       }
 
-      const Component = CustomComponent || DraftEditorBlock;
+      const Component = CustomComponent || configForType.component || DraftEditorBlock;
       let childProps = {
         className,
         'data-block': true,

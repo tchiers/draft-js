@@ -86,10 +86,16 @@ function getDefaultKeyBinding(
       return hasCommandModifier(e) ? 'code' : null;
     case 75: // K
       return (!isWindows && isCtrlKeyCommand(e)) ? 'secondary-cut' : null;
+    case 76: // L
+      return isCtrlKeyCommand(e) ? 'insert-column' : null;
     case 77: // M
       return isCtrlKeyCommand(e) ? 'split-block' : null;
     case 79: // O
       return isCtrlKeyCommand(e) ? 'split-block' : null;
+    case 82: // R
+      return isCtrlKeyCommand(e) ? 'insert-row' : null;
+    case 83: // S
+      return isCtrlKeyCommand(e) ? 'insert-cell' : null;
     case 84: // T
       return (isOSX && isCtrlKeyCommand(e)) ? 'transpose-characters' : null;
     case 85: // U

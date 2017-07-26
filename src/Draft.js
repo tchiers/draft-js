@@ -22,6 +22,7 @@ const DefaultDraftBlockRenderMap = require('DefaultDraftBlockRenderMap');
 const DefaultDraftInlineStyle = require('DefaultDraftInlineStyle');
 const DraftEditor = require('DraftEditor.react');
 const DraftEditorBlock = require('DraftEditorBlock.react');
+const DraftEditorTable = require('DraftEditorTable.react');
 const DraftEditorLeaf = require('DraftEditorLeaf.react');
 const DraftEntity = require('DraftEntity');
 const DraftModifier = require('DraftModifier');
@@ -42,6 +43,7 @@ const getVisibleSelectionRect = require('getVisibleSelectionRect');
 const DraftPublic = {
   Editor: DraftEditor,
   EditorBlock: DraftEditorBlock,
+  EditorTable: DraftEditorTable,
   EditorLeaf: DraftEditorLeaf,
   EditorState,
 

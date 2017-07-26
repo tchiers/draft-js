@@ -29,6 +29,12 @@ var keyCommandMoveSelectionToEndOfBlock = require('keyCommandMoveSelectionToEndO
 var keyCommandMoveSelectionToStartOfBlock = require('keyCommandMoveSelectionToStartOfBlock');
 var keyCommandTransposeCharacters = require('keyCommandTransposeCharacters');
 var keyCommandUndo = require('keyCommandUndo');
+var keyCommandInsertEntity = require('keyCommandInsertEntity');
+var keyCommandInsertRow = require('keyCommandInsertRow');
+var keyCommandInsertColumn = require('keyCommandInsertColumn');
+
+
+var RichTextEditorUtil = require('RichTextEditorUtil');
 
 import type DraftEditor from 'DraftEditor.react';
 import type {DraftEditorCommand} from 'DraftEditorCommand';
@@ -69,9 +75,46 @@ function onKeyCommand(
       return SecondaryClipboard.cut(editorState);
     case 'secondary-paste':
       return SecondaryClipboard.paste(editorState);
+    case 'insert-row': {
+      let insertionPoint = findInsertionPoint(editorState, ["TABLE-ROW"]);
+      return keyCommandInsertRow(editorState, insertionPoint, 'TABLE-ROW', "\n<row>");
+    }
+    case 'insert-column': {
+      return keyCommandInsertColumn(editorState);
+    }
+    case 'insert-cell': {
+      let insertionPoint = findInsertionPoint(editorState, ["TABLE-ROW", "TABLE-CELL"]);
+      return keyCommandInsertEntity(editorState, insertionPoint, 'TABLE-CELL', "<cell>");
+    }
     default:
       return editorState;
   }
+}
+
+function findInsertionPoint(editorState: EditorState, entityTypes: Array = []) {
+    let selection = editorState.getSelection();
+    let startKey = selection.getStartKey();
+    let contentState = editorState.getCurrentContent();
+    let contentBlock = contentState.getBlockForKey(startKey);
+    let i = selection.getAnchorOffset();
+    let len = contentBlock.getLength();
+    let ent;
+    while (i < len){
+        ent = contentBlock.getEntityAt(i);
+        if (ent) {
+            ent = contentState.getEntity(ent).getType();
+            if (entityTypes.indexOf(ent) != -1) break;
+        }
+        i++;
+    }
+
+    return selection.merge({
+        anchorKey: startKey,
+        anchorOffset: i,
+        focusKey: startKey,
+        focusOffset: i,
+        isBackward: false,
+    });
 }
 
 /**
@@ -88,10 +131,21 @@ function editOnKeyDown(editor: DraftEditor, e: SyntheticKeyboardEvent): void {
   var editorState = editor._latestEditorState;
 
   switch (keyCode) {
-    case Keys.RETURN:
+      case Keys.RETURN:
       e.preventDefault();
       // The top-level component may manually handle newline insertion. If
       // no special handling is performed, fall through to command handling.
+
+      //returns within a table must do newline insertion instead
+      const sel = editorState.getSelection();
+      const content = editorState.getCurrentContent().getBlockMap().filter(block => (block.getType() == 'table'));
+      const inTable = content.some(block => (sel.hasEdgeWithin(block.getKey(), 0, block.getLength())));
+      if (inTable) {
+          const inserted = RichTextEditorUtil.insertSoftNewline(editorState);
+          editor.update(inserted);
+          return;
+      }
+
       if (
         editor.props.handleReturn &&
         isEventHandled(editor.props.handleReturn(e, editorState))

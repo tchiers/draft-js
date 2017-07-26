@@ -162,7 +162,7 @@ class EditorState {
         );
       }
 
-      state.merge(put);
+      state.merge({...put, decorator: newDecorator, externalDecorator: externalDecorator});
     });
 
     return new EditorState(map);
